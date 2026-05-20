@@ -1,9 +1,6 @@
 import React from 'react';
 import {EmptyWatchlist} from './components/EmptyWatchlist.js';
-
-type AppView = {
-  watchlist: string[];
-};
+import type {AppView} from './view.js';
 
 export function App({view}: {view: AppView}) {
   if (view.watchlist.length === 0) {
