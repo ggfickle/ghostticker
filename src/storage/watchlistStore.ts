@@ -40,3 +40,20 @@ export async function addSymbol(symbol: string): Promise<Watchlist> {
   await writeWatchlist(nextWatchlist);
   return nextWatchlist;
 }
+
+export async function removeSymbol(symbol: string): Promise<Watchlist> {
+  const normalizedSymbol = symbol.trim();
+  if (normalizedSymbol.length === 0) {
+    return loadWatchlist();
+  }
+
+  const watchlist = await loadWatchlist();
+  const nextWatchlist = watchlist.filter((item) => item !== normalizedSymbol);
+
+  if (nextWatchlist.length === watchlist.length) {
+    return watchlist;
+  }
+
+  await writeWatchlist(nextWatchlist);
+  return nextWatchlist;
+}
