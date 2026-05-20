@@ -29,4 +29,13 @@ describe('watchlist store', () => {
     expect(watchlist).toEqual(['600519']);
     expect(JSON.parse(raw)).toEqual(['600519']);
   });
+
+  it('ignores blank symbols without corrupting the watchlist', async () => {
+    await addSymbol('600519');
+    await addSymbol('   ');
+
+    const watchlist = await loadWatchlist();
+
+    expect(watchlist).toEqual(['600519']);
+  });
 });

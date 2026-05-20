@@ -24,4 +24,14 @@ describe('preferences store', () => {
     expect(prefs.refreshSeconds).toBe(5);
     expect(prefs.defaultMode).toBe('quiet');
   });
+
+  it('returns independent default preference objects when file does not exist', async () => {
+    const firstPrefs = await loadPreferences();
+    firstPrefs.refreshSeconds = 10;
+
+    const secondPrefs = await loadPreferences();
+
+    expect(secondPrefs.refreshSeconds).toBe(5);
+    expect(secondPrefs).not.toBe(firstPrefs);
+  });
 });

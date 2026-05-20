@@ -13,7 +13,7 @@ export async function loadPreferences(): Promise<Preferences> {
     return preferencesSchema.parse(JSON.parse(raw));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return defaultPreferences;
+      return {...defaultPreferences};
     }
 
     throw error;

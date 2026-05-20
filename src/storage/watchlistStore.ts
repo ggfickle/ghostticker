@@ -26,6 +26,10 @@ export async function loadWatchlist(): Promise<Watchlist> {
 
 export async function addSymbol(symbol: string): Promise<Watchlist> {
   const normalizedSymbol = symbol.trim();
+  if (normalizedSymbol.length === 0) {
+    return loadWatchlist();
+  }
+
   const watchlist = await loadWatchlist();
 
   if (watchlist.includes(normalizedSymbol)) {
