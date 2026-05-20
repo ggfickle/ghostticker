@@ -9,35 +9,18 @@ type AppProps =
   | {view: AppView; initialInput?: never}
   | {initialInput: string[]; view?: undefined};
 
-export function App(props: AppProps) {
-  if (props.view !== undefined) {
-    const {view} = props;
-    if (view.watchlist.length === 0) {
-      return <EmptyWatchlist />;
-    }
-
-    return (
-      <Box flexDirection="column">
-        <Text>Watchlist loaded</Text>
-      </Box>
-    );
-  }
-
-  const {watchlist, managingWatchlist, inputBuffer, selectedIndex} = useAppController(
-    props.initialInput
-  );
-
-  if (managingWatchlist) {
+function renderView(view: AppView) {
+  if (view.managingWatchlist) {
     return (
       <ManageWatchlist
-        watchlist={watchlist}
-        inputBuffer={inputBuffer}
-        selectedIndex={selectedIndex}
+        watchlist={view.watchlist}
+        inputBuffer={view.inputBuffer ?? ''}
+        selectedIndex={view.selectedIndex ?? 0}
       />
     );
   }
 
-  if (watchlist.length === 0) {
+  if (view.watchlist.length === 0) {
     return <EmptyWatchlist />;
   }
 
@@ -46,4 +29,26 @@ export function App(props: AppProps) {
       <Text>Watchlist loaded</Text>
     </Box>
   );
+}
+
+export function App(props: AppProps) {
+  if (props.view !== undefined) {
+    return renderView(props.view);
+  }
+
+  const {watchlist, managingWatchlist, inputBuffer, selectedIndex} = useAppController(
+    props.initialInput
+  );
+
+  return renderView({
+    mode: 'quiet',
+    watchlist,
+    events: [],
+    focusedSymbol: watchlist[selectedIndex] ?? null,
+    detailOpen: false,
+    managingWatchlist,
+    lastUpdatedAt: null,
+    inputBuffer,
+    selectedIndex
+  });
 }

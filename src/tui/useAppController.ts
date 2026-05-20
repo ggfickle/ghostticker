@@ -1,28 +1,20 @@
 import {useInput} from 'ink';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
+import type {Watchlist} from '../domain/watchlist.js';
 import {addSymbol, loadWatchlist, removeSymbol} from '../storage/watchlistStore.js';
 
 type AppControllerState = {
-  watchlist: string[];
+  watchlist: Watchlist;
   managingWatchlist: boolean;
   inputBuffer: string;
   selectedIndex: number;
 };
 
-export function useAppController(initialWatchlist: string[]) {
+export function useAppController(initialWatchlist: Watchlist) {
   const [watchlist, setWatchlist] = useState(initialWatchlist);
   const [managingWatchlist, setManagingWatchlist] = useState(false);
   const [inputBuffer, setInputBuffer] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-
-  useEffect(() => {
-    void (async () => {
-      const storedWatchlist = await loadWatchlist();
-      if (storedWatchlist.length > 0) {
-        setWatchlist(storedWatchlist);
-      }
-    })();
-  }, []);
 
   useInput(async (input, key) => {
     if (key.escape) {
@@ -44,7 +36,9 @@ export function useAppController(initialWatchlist: string[]) {
     if (key.return || input === '\r' || input === '\n') {
       const nextWatchlist = await addSymbol(inputBuffer);
       setWatchlist(nextWatchlist);
-      setSelectedIndex(Math.max(0, nextWatchlist.length - 1));
+      if (nextWatchlist.length > watchlist.length) {
+        setSelectedIndex(Math.max(0, nextWatchlist.length - 1));
+      }
       setInputBuffer('');
       return;
     }

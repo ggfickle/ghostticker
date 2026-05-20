@@ -1,8 +1,9 @@
 import React from 'react';
 import {Box, Text} from 'ink';
+import type {Watchlist} from '../../domain/watchlist.js';
 
 type ManageWatchlistProps = {
-  watchlist: string[];
+  watchlist: Watchlist;
   inputBuffer: string;
   selectedIndex: number;
 };
