@@ -17,22 +17,17 @@ type ControllerView = {
 };
 
 function renderView(view: AppView, controller?: ControllerView) {
-  if (view.managingWatchlist) {
-    return (
-      <ManageWatchlist
-        watchlist={view.watchlist}
-        inputBuffer=""
-        selectedIndex={0}
-      />
-    );
-  }
+  const managingWatchlist = controller?.managingWatchlist ?? view.managingWatchlist;
+  if (managingWatchlist) {
+    const watchlist = controller?.watchlist ?? view.watchlist;
+    const inputBuffer = controller?.inputBuffer ?? '';
+    const selectedIndex = controller?.selectedIndex ?? 0;
 
-  if ((controller?.managingWatchlist ?? view.managingWatchlist) && controller) {
     return (
       <ManageWatchlist
-        watchlist={controller.watchlist}
-        inputBuffer={controller.inputBuffer}
-        selectedIndex={controller.selectedIndex}
+        watchlist={watchlist}
+        inputBuffer={inputBuffer}
+        selectedIndex={selectedIndex}
       />
     );
   }

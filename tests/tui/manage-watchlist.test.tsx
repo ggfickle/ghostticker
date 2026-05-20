@@ -64,6 +64,8 @@ describe('manage watchlist flow', () => {
       await nextTick();
     }
 
+    expect(app.lastFrame()).toContain('Input: 600519');
+
     app.stdin.write('\r');
     await nextTick();
 
@@ -100,6 +102,7 @@ describe('manage watchlist flow', () => {
     await nextTick();
     app.stdin.write('j');
     await nextTick();
+    expect(app.lastFrame()).toContain('> 000001');
     app.stdin.write('x');
     await nextTick();
     await nextTick();
