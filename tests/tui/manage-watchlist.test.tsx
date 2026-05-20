@@ -44,9 +44,7 @@ describe('manage watchlist flow', () => {
           focusedSymbol: '600519',
           detailOpen: false,
           managingWatchlist: true,
-          lastUpdatedAt: null,
-          inputBuffer: '',
-          selectedIndex: 0
+          lastUpdatedAt: null
         }}
       />
     );
@@ -121,8 +119,6 @@ describe('manage watchlist flow', () => {
 
     app.stdin.write('a');
     await nextTick();
-    app.stdin.write('j');
-    await nextTick();
     app.stdin.write('\r');
     await nextTick();
     await nextTick();
@@ -130,7 +126,7 @@ describe('manage watchlist flow', () => {
     const watchlistPath = path.join(tempHome, '.worklog-stock-cli', 'watchlist.json');
     const raw = await readFile(watchlistPath, 'utf8');
 
-    expect(app.lastFrame()).toContain('> 000001');
+    expect(app.lastFrame()).toContain('> 600519');
     expect(JSON.parse(raw)).toEqual(['600519', '000001']);
   });
 

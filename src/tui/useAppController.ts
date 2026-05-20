@@ -1,7 +1,7 @@
 import {useInput} from 'ink';
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import type {Watchlist} from '../domain/watchlist.js';
-import {addSymbol, loadWatchlist, removeSymbol} from '../storage/watchlistStore.js';
+import {addSymbol, removeSymbol} from '../storage/watchlistStore.js';
 
 type AppControllerState = {
   watchlist: Watchlist;
@@ -15,6 +15,16 @@ export function useAppController(initialWatchlist: Watchlist) {
   const [managingWatchlist, setManagingWatchlist] = useState(false);
   const [inputBuffer, setInputBuffer] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const watchlistRef = useRef(watchlist);
+  const selectedIndexRef = useRef(selectedIndex);
+
+  useEffect(() => {
+    watchlistRef.current = watchlist;
+  }, [watchlist]);
+
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
 
   useInput(async (input, key) => {
     if (key.escape) {
@@ -36,7 +46,7 @@ export function useAppController(initialWatchlist: Watchlist) {
     if (key.return || input === '\r' || input === '\n') {
       const nextWatchlist = await addSymbol(inputBuffer);
       setWatchlist(nextWatchlist);
-      if (nextWatchlist.length > watchlist.length) {
+      if (nextWatchlist.length > watchlistRef.current.length) {
         setSelectedIndex(Math.max(0, nextWatchlist.length - 1));
       }
       setInputBuffer('');
@@ -44,7 +54,7 @@ export function useAppController(initialWatchlist: Watchlist) {
     }
 
     if (input === 'x') {
-      const symbol = watchlist[selectedIndex];
+      const symbol = watchlistRef.current[selectedIndexRef.current];
       if (!symbol) {
         return;
       }
@@ -56,7 +66,9 @@ export function useAppController(initialWatchlist: Watchlist) {
     }
 
     if (input === 'j') {
-      setSelectedIndex((current) => Math.min(current + 1, Math.max(watchlist.length - 1, 0)));
+      setSelectedIndex((current) =>
+        Math.min(current + 1, Math.max(watchlistRef.current.length - 1, 0))
+      );
       return;
     }
 

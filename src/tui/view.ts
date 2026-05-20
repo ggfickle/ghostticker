@@ -8,6 +8,4 @@ export type AppView = {
   detailOpen: boolean;
   managingWatchlist: boolean;
   lastUpdatedAt: string | null;
-  inputBuffer?: string;
-  selectedIndex?: number;
 };
