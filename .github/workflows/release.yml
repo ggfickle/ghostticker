@@ -34,13 +34,15 @@ jobs:
 
       - name: Pack release bundle
         run: |
-          mkdir -p release
-          cp -R dist release/ghostticker
-          cp README.md LICENSE package.json release/ghostticker/
+          mkdir -p release/ghostticker
+          cp -R dist release/ghostticker/dist
+          cp -R scripts release/ghostticker/scripts
+          cp README.md LICENSE package.json package-lock.json release/ghostticker/
+          chmod +x release/ghostticker/dist/cli.js release/ghostticker/scripts/install.sh
           cd release
-          tar -czf ghostticker-${GITHUB_REF_NAME}-linux-x64.tar.gz ghostticker
+          tar -czf ghostticker-${GITHUB_REF_NAME}.tar.gz ghostticker
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/ghostticker-${{ github.ref_name }}-linux-x64.tar.gz
+          files: release/ghostticker-${{ github.ref_name }}.tar.gz

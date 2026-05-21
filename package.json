@@ -1,12 +1,15 @@
 {
   "name": "ghostticker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A disguised terminal watchlist TUI for quietly tracking A-share symbols.",
   "license": "MIT",
   "bin": {
     "ghostticker": "./dist/cli.js"
   },
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsx src/cli.tsx",

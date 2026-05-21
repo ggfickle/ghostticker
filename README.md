@@ -25,14 +25,35 @@ Market quote fetching and the disguised log/event stream are still under active 
 
 ## Install
 
+`ghostticker` is a Node.js terminal CLI, so the release package is platform-neutral. You need Node.js 22 or newer and npm.
+
 ```bash
-npm install
+curl -fsSL https://raw.githubusercontent.com/ggfickle/ghostticker/main/scripts/install.sh | bash
 ```
 
 ## Run
 
 ```bash
-npm run dev
+ghostticker
+```
+
+The installer downloads the latest GitHub release, installs it under `~/.local/share/ghostticker`, and writes a launcher to `~/.local/bin/ghostticker`.
+
+If `ghostticker` is not found after install, add this to your shell profile:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+## Manual install from source
+
+```bash
+git clone https://github.com/ggfickle/ghostticker.git
+cd ghostticker
+npm ci
+npm run build
+npm link
+ghostticker
 ```
 
 ## Test
