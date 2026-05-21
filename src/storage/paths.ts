@@ -1,7 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 
-const DATA_DIR_NAME = '.worklog-stock-cli';
+const DATA_DIR_NAME = '.ghostticker';
 
 function getHomeDirectory(): string {
   return process.env.HOME ?? os.homedir();

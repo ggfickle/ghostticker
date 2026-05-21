@@ -9,7 +9,7 @@ describe('watchlist store', () => {
   const originalHome = process.env.HOME;
 
   beforeEach(async () => {
-    tempHome = await mkdtemp(path.join(os.tmpdir(), 'worklog-stock-cli-watchlist-'));
+    tempHome = await mkdtemp(path.join(os.tmpdir(), 'ghostticker-watchlist-'));
     process.env.HOME = tempHome;
   });
 
@@ -23,7 +23,7 @@ describe('watchlist store', () => {
     await addSymbol('600519');
 
     const watchlist = await loadWatchlist();
-    const watchlistPath = path.join(tempHome, '.worklog-stock-cli', 'watchlist.json');
+    const watchlistPath = path.join(tempHome, '.ghostticker', 'watchlist.json');
     const raw = await readFile(watchlistPath, 'utf8');
 
     expect(watchlist).toEqual(['600519']);

@@ -1,0 +1,46 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build bundle
+        run: npm run build
+
+      - name: Pack release bundle
+        run: |
+          mkdir -p release
+          cp -R dist release/ghostticker
+          cp README.md LICENSE package.json release/ghostticker/
+          cd release
+          tar -czf ghostticker-${GITHUB_REF_NAME}-linux-x64.tar.gz ghostticker
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/ghostticker-${{ github.ref_name }}-linux-x64.tar.gz

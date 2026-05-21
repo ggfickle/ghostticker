@@ -9,7 +9,7 @@ describe('preferences store', () => {
   const originalHome = process.env.HOME;
 
   beforeEach(async () => {
-    tempHome = await mkdtemp(path.join(os.tmpdir(), 'worklog-stock-cli-preferences-'));
+    tempHome = await mkdtemp(path.join(os.tmpdir(), 'ghostticker-preferences-'));
     process.env.HOME = tempHome;
   });
 

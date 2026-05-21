@@ -16,7 +16,7 @@ describe('manage watchlist flow', () => {
   const originalHome = process.env.HOME;
 
   beforeEach(async () => {
-    tempHome = await mkdtemp(path.join(os.tmpdir(), 'worklog-stock-cli-manage-'));
+    tempHome = await mkdtemp(path.join(os.tmpdir(), 'ghostticker-manage-'));
     process.env.HOME = tempHome;
   });
 
@@ -69,7 +69,7 @@ describe('manage watchlist flow', () => {
     app.stdin.write('\r');
     await nextTick();
 
-    const watchlistPath = path.join(tempHome, '.worklog-stock-cli', 'watchlist.json');
+    const watchlistPath = path.join(tempHome, '.ghostticker', 'watchlist.json');
     const raw = await readFile(watchlistPath, 'utf8');
 
     expect(app.lastFrame()).toContain('600519');
@@ -86,7 +86,7 @@ describe('manage watchlist flow', () => {
     await nextTick();
     await nextTick();
 
-    const watchlistPath = path.join(tempHome, '.worklog-stock-cli', 'watchlist.json');
+    const watchlistPath = path.join(tempHome, '.ghostticker', 'watchlist.json');
     const raw = await readFile(watchlistPath, 'utf8');
 
     expect(app.lastFrame()).not.toContain('600519');
@@ -107,7 +107,7 @@ describe('manage watchlist flow', () => {
     await nextTick();
     await nextTick();
 
-    const watchlistPath = path.join(tempHome, '.worklog-stock-cli', 'watchlist.json');
+    const watchlistPath = path.join(tempHome, '.ghostticker', 'watchlist.json');
     const raw = await readFile(watchlistPath, 'utf8');
 
     expect(app.lastFrame()).toContain('600519');
@@ -126,7 +126,7 @@ describe('manage watchlist flow', () => {
     await nextTick();
     await nextTick();
 
-    const watchlistPath = path.join(tempHome, '.worklog-stock-cli', 'watchlist.json');
+    const watchlistPath = path.join(tempHome, '.ghostticker', 'watchlist.json');
     const raw = await readFile(watchlistPath, 'utf8');
 
     expect(app.lastFrame()).toContain('> 600519');
