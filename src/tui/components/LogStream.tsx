@@ -7,6 +7,7 @@ interface LogStreamProps {
   quotes: Map<string, NormalizedQuote>;
   maxLines?: number;
   safeMode?: boolean;
+  viewportRows?: number;
 }
 
 const LEVEL_COLORS: Record<EventLevel, string> = {
@@ -91,11 +92,55 @@ function disguiseEpilogue(anchor: Date): Array<{timestamp: string; level: EventL
   ];
 }
 
-export function LogStream({events, quotes, maxLines = 20, safeMode = false}: LogStreamProps) {
+const FILLER_SOURCES = [
+  'sys.watcher',
+  'mux.worker',
+  'tty.sink',
+  'log.rotate',
+  'ipc.relay',
+  'proc.guard',
+  'cache.scan',
+  'delta.merge'
+] as const;
+
+const FILLER_MESSAGES = [
+  'poll window advanced cursor=tail status=ready',
+  'frame sync stable backlog=0 route=local',
+  'append checkpoint acknowledged sink=stdout',
+  'flush gate open buffer=warm mode=stream',
+  'cursor checkpoint persisted scope=session',
+  'heartbeat ok latency=14ms lane=shadow',
+  'batch coalesce complete shard=focus',
+  'stream settle observed jitter=low'
+] as const;
+
+function buildDisguiseFill(anchor: Date, count: number): Array<{timestamp: string; level: EventLevel; source: string; message: string}> {
+  return Array.from({length: count}, (_, index) => ({
+    timestamp: offsetTimestamp(anchor, -18 + index * 2),
+    level: index % 3 === 1 ? 'INFO' : 'TRACE',
+    source: FILLER_SOURCES[index % FILLER_SOURCES.length]!,
+    message: FILLER_MESSAGES[index % FILLER_MESSAGES.length]!
+  }));
+}
+
+export function LogStream({events, quotes, maxLines = 20, safeMode = false, viewportRows}: LogStreamProps) {
   const displayEvents = events.slice(-maxLines);
   const anchor = displayEvents.at(-1)?.timestamp ?? new Date();
-  const prelude = disguisePrelude(anchor);
-  const epilogue = disguiseEpilogue(anchor);
+  const eventRows = displayEvents.reduce((count, event) => {
+    const quote = quotes.get(event.symbol);
+    if (safeMode || !quote) {
+      return count + 1;
+    }
+
+    return count + 2;
+  }, 0);
+  const minimumShellRows = 4;
+  const targetRows = Math.max(viewportRows ?? 0, eventRows + minimumShellRows);
+  const shellRows = Math.max(minimumShellRows, targetRows - eventRows);
+  const preludeCount = Math.ceil(shellRows / 2);
+  const epilogueCount = Math.floor(shellRows / 2);
+  const prelude = [...buildDisguiseFill(anchor, Math.max(0, preludeCount - 2)), ...disguisePrelude(anchor)];
+  const epilogue = [...disguiseEpilogue(anchor), ...buildDisguiseFill(new Date(anchor.getTime() + 12000), Math.max(0, epilogueCount - 2))];
 
   return (
     <Box flexDirection="column">

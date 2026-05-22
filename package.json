@@ -4,7 +4,7 @@
   "description": "A disguised terminal watchlist TUI for quietly tracking A-share symbols.",
   "license": "MIT",
   "bin": {
-    "ghostticker": "./dist/cli.js"
+    "gtr": "./dist/cli.js"
   },
   "type": "module",
   "engines": {

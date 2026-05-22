@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, Text} from 'ink';
+import {Box, Text, useWindowSize} from 'ink';
 import {EmptyWatchlist} from './components/EmptyWatchlist.js';
 import {ManageWatchlist} from './components/ManageWatchlist.js';
 import {LogStream} from './components/LogStream.js';
@@ -55,6 +55,7 @@ function StatusBar({focusedSymbol, detailOpen, safeMode}: {
 }
 
 export function App() {
+  const {rows} = useWindowSize();
   const {
     watchlist,
     managingWatchlist,
@@ -68,6 +69,8 @@ export function App() {
     lastUpdate,
     focusedSymbol
   } = useAppController([]);
+  const reservedRows = 5 + (detailOpen && focusedSymbol ? 15 : 0);
+  const logViewportRows = Math.max(8, rows - reservedRows);
 
   if (managingWatchlist) {
     return (
@@ -99,7 +102,7 @@ export function App() {
     <Box flexDirection="column">
       <Header lastUpdate={lastUpdate} safeMode={safeMode} />
 
-      <LogStream events={events} quotes={quotes} safeMode={safeMode} />
+      <LogStream events={events} quotes={quotes} safeMode={safeMode} viewportRows={logViewportRows} />
 
       {detailOpen && focusedSymbol && (
         <Box marginTop={1}>

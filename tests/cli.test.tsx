@@ -29,7 +29,7 @@ describe('cli startup', () => {
     const loadWatchlistMock = vi.fn();
     const logMock = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    process.argv = ['node', 'ghostticker', '--help'];
+    process.argv = ['node', 'gtr', '--help'];
     vi.doMock('ink', () => ({
       render: renderMock
     }));
@@ -39,7 +39,7 @@ describe('cli startup', () => {
 
     await import('../src/cli.js');
 
-    expect(logMock).toHaveBeenCalledWith(expect.stringContaining('Usage: ghostticker'));
+    expect(logMock).toHaveBeenCalledWith(expect.stringContaining('Usage: gtr'));
     expect(loadWatchlistMock).not.toHaveBeenCalled();
     expect(renderMock).not.toHaveBeenCalled();
   });
@@ -49,7 +49,7 @@ describe('cli startup', () => {
     const loadWatchlistMock = vi.fn();
     const logMock = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    process.argv = ['node', 'ghostticker', '--version'];
+    process.argv = ['node', 'gtr', '--version'];
     vi.doMock('ink', () => ({
       render: renderMock
     }));

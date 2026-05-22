@@ -9,7 +9,7 @@ const {version} = require('../package.json') as {version: string};
 const args = process.argv.slice(2);
 
 if (args.includes('--help') || args.includes('-h')) {
-  console.log(`Usage: ghostticker
+  console.log(`Usage: gtr
 
 A local terminal TUI for quietly watching an A-share watchlist.
 

@@ -55,4 +55,23 @@ describe('LogStream', () => {
     expect(frame).toContain('task.600519');
     expect(frame).toContain('Kweichow Moutai');
   });
+
+  it('fills the viewport with disguise logs when market activity is sparse', () => {
+    const quotes = new Map([[sampleQuote().symbol, sampleQuote()]]);
+    const app = render(
+      <LogStream
+        events={[sampleEvent()]}
+        quotes={quotes}
+        viewportRows={12}
+      />
+    );
+
+    const lines = app.lastFrame().split('\n').filter(Boolean);
+    const disguiseLines = lines.filter((line) =>
+      /(proc\.supervisor|io\.scheduler|cache\.relay|runtime\.guard|sys\.watcher|mux\.worker|tty\.sink|log\.rotate)/.test(line)
+    );
+
+    expect(lines.length).toBeGreaterThanOrEqual(10);
+    expect(disguiseLines.length).toBeGreaterThanOrEqual(6);
+  });
 });

@@ -64,14 +64,14 @@ mv "${tmp_dir}/ghostticker" "$GHOSTTICKER_INSTALL_DIR"
 )
 
 entrypoint="$(printf "%s" "${GHOSTTICKER_INSTALL_DIR}/dist/cli.js" | sed "s/'/'\\\\''/g")"
-cat > "${GHOSTTICKER_BIN_DIR}/ghostticker" <<EOF
+cat > "${GHOSTTICKER_BIN_DIR}/gtr" <<EOF
 #!/usr/bin/env sh
 exec node '${entrypoint}' "\$@"
 EOF
-chmod +x "${GHOSTTICKER_BIN_DIR}/ghostticker"
+chmod +x "${GHOSTTICKER_BIN_DIR}/gtr"
 
 echo "ghostticker installed to ${GHOSTTICKER_INSTALL_DIR}"
-echo "Run: ghostticker"
-if ! command -v ghostticker >/dev/null 2>&1; then
-  echo "If ghostticker is not found, add ${GHOSTTICKER_BIN_DIR} to PATH." >&2
+echo "Run: gtr"
+if ! command -v gtr >/dev/null 2>&1; then
+  echo "If gtr is not found, add ${GHOSTTICKER_BIN_DIR} to PATH." >&2
 fi
