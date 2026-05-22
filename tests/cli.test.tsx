@@ -10,20 +10,17 @@ describe('cli startup', () => {
     vi.resetModules();
   });
 
-  it('loads the persisted watchlist before rendering', async () => {
-    const renderMock = vi.fn();
-    const loadWatchlistMock = vi.fn().mockResolvedValue(['600519']);
+  it('renders the App component', async () => {
+    const waitUntilExit = vi.fn().mockResolvedValue(undefined);
+    const unmount = vi.fn();
+    const renderMock = vi.fn().mockReturnValue({unmount, waitUntilExit});
 
     vi.doMock('ink', () => ({
       render: renderMock
     }));
-    vi.doMock('../src/storage/watchlistStore.js', () => ({
-      loadWatchlist: loadWatchlistMock
-    }));
 
     await import('../src/cli.js');
 
-    expect(loadWatchlistMock).toHaveBeenCalledTimes(1);
     expect(renderMock).toHaveBeenCalledTimes(1);
   });
 

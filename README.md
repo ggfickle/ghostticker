@@ -7,7 +7,8 @@ It is intentionally small and local-first:
 - watchlist is stored on disk
 - no account system
 - keyboard-only interaction
-- default UI stays minimal
+- default UI looks like a log stream
+- alternate screen (content disappears on exit)
 
 ## Current status
 
@@ -16,12 +17,21 @@ This is an early open-source build with the following working pieces:
 - empty-state TUI
 - local watchlist persistence
 - watchlist management screen
+- real-time market quotes (via Tencent Finance API)
+- event engine with TRACE/INFO/WARN levels
+- log stream UI disguised as terminal output
+- field obfuscation (task.symbol, delta, rate, flow)
+- intraday chart (press `v` to show/hide)
+- safe mode (press `s` to hide all market hints)
+- 5-second auto-refresh
+- alternate screen (like `less` - content disappears on exit)
 - `a` to open/close watchlist manager
 - `j` / `k` to move selection
 - `x` to delete the selected symbol
 - `Enter` to add a numeric symbol
-
-Market quote fetching and the disguised log/event stream are still under active development.
+- `v` to toggle intraday chart
+- `s` to toggle safe mode
+- `q` or `Esc` to quit
 
 ## Install
 
@@ -65,11 +75,30 @@ npx tsc --noEmit
 
 ## Keys
 
+- `q` or `Esc`: quit (Esc in manager returns to main view, Esc again quits)
 - `a`: open or close watchlist manager
-- `j` / `k`: move selected symbol in the manager
-- `x`: delete selected symbol
-- `Enter`: save the typed symbol
-- `Esc`: leave the manager
+- `j` / `k`: move selection (works in both views)
+- `x`: delete selected symbol (in manager)
+- `Enter`: save the typed symbol (in manager)
+- `v`: toggle intraday chart for focused symbol
+- `s`: toggle safe mode (hide all market hints)
+- `r`: manual refresh (not yet implemented)
+
+## Display Modes
+
+### Quiet Mode (default)
+
+Looks like a normal terminal log stream:
+- TRACE/INFO/WARN events
+- Field names: task.symbol, delta, rate, flow
+- No obvious stock market terminology
+
+### Safe Mode (press `s`)
+
+Even more discreet:
+- Hides delta, rate, flow fields
+- Only shows event messages
+- Use when someone is nearby
 
 ## Local data
 

@@ -3,7 +3,6 @@ import {createRequire} from 'node:module';
 import React from 'react';
 import {render} from 'ink';
 import {App} from './tui/App.js';
-import {loadWatchlist} from './storage/watchlistStore.js';
 
 const require = createRequire(import.meta.url);
 const {version} = require('../package.json') as {version: string};
@@ -20,7 +19,30 @@ Options:
 } else if (args.includes('--version') || args.includes('-v')) {
   console.log(version);
 } else {
-  const watchlist = await loadWatchlist();
+  // Enter alternate screen buffer
+  process.stdout.write('\x1b[?1049h');
+  // Hide cursor
+  process.stdout.write('\x1b[?25l');
 
-  render(<App initialInput={watchlist} />);
+  const cleanup = () => {
+    // Show cursor
+    process.stdout.write('\x1b[?25h');
+    // Leave alternate screen buffer
+    process.stdout.write('\x1b[?1049l');
+  };
+
+  process.on('SIGINT', () => {
+    cleanup();
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', () => {
+    cleanup();
+    process.exit(0);
+  });
+
+  const {waitUntilExit} = render(<App />);
+
+  await waitUntilExit();
+  cleanup();
 }
