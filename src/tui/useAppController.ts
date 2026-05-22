@@ -17,6 +17,7 @@ export interface AppState {
   events: QuoteEvent[];
   quotes: Map<string, NormalizedQuote>;
   intradayData: Map<string, IntradayPoint[]>;
+  intradayErrors: Map<string, string>;
   safeMode: boolean;
   detailOpen: boolean;
   lastUpdate: Date | null;
@@ -31,6 +32,7 @@ export function useAppController(_initialWatchlist: Watchlist) {
   const [events, setEvents] = useState<QuoteEvent[]>([]);
   const [quotes, setQuotes] = useState<Map<string, NormalizedQuote>>(new Map());
   const [intradayData, setIntradayData] = useState<Map<string, IntradayPoint[]>>(new Map());
+  const [intradayErrors, setIntradayErrors] = useState<Map<string, string>>(new Map());
   const [safeMode, setSafeMode] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -99,10 +101,34 @@ export function useAppController(_initialWatchlist: Watchlist) {
     };
   }, [watchlist.join(',')]);
 
-  async function loadIntraday(symbol: string) {
-    const data = await fetchIntraday(symbol);
-    if (data.length > 0) {
-      setIntradayData(prev => new Map(prev).set(symbol, data));
+  async function loadIntraday(symbol: string): Promise<void> {
+    try {
+      setIntradayErrors(prev => {
+        const next = new Map(prev);
+        next.delete(symbol);
+        return next;
+      });
+
+      const data = await fetchIntraday(symbol);
+
+      if (data.length > 0) {
+        setIntradayData(prev => new Map(prev).set(symbol, data));
+        return;
+      }
+
+      setIntradayData(prev => {
+        const next = new Map(prev);
+        next.delete(symbol);
+        return next;
+      });
+      setIntradayErrors(prev => new Map(prev).set(symbol, 'Intraday request failed. Please confirm the stock code exists.'));
+    } catch {
+      setIntradayData(prev => {
+        const next = new Map(prev);
+        next.delete(symbol);
+        return next;
+      });
+      setIntradayErrors(prev => new Map(prev).set(symbol, 'Intraday request failed. Please confirm the stock code exists.'));
     }
   }
 
@@ -124,6 +150,7 @@ export function useAppController(_initialWatchlist: Watchlist) {
 
     if (input === 's' && !managingWatchlist) {
       setSafeMode(prev => !prev);
+      setDetailOpen(false);
       return;
     }
 
@@ -171,6 +198,11 @@ export function useAppController(_initialWatchlist: Watchlist) {
     }
 
     if (managingWatchlist) {
+      if (key.backspace || key.delete || input === '\x7f' || input === '\b') {
+        setInputBuffer(current => current.slice(0, -1));
+        return;
+      }
+
       if (key.return || input === '\r' || input === '\n') {
         const nextWatchlist = await addSymbol(inputBuffer);
         setWatchlist(nextWatchlist);
@@ -206,6 +238,7 @@ export function useAppController(_initialWatchlist: Watchlist) {
     events,
     quotes,
     intradayData,
+    intradayErrors,
     safeMode,
     detailOpen,
     lastUpdate,

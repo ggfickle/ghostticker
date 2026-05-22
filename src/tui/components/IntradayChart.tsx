@@ -10,6 +10,7 @@ interface IntradayChartProps {
   name?: string;
   prevClose?: number;
   volume?: number;
+  error?: string;
 }
 
 const BRAILLE_EMPTY = 0x2800;
@@ -198,12 +199,25 @@ function rasterizeBraille(curve: number[][], baseline: number[][], width: number
   return {rows, baselineRows};
 }
 
+function formatPriceScale(value: number): string {
+  return value.toFixed(2).padStart(7);
+}
+
+function scaleLabel(rowIndex: number, height: number, min: number, max: number): string {
+  if (height <= 1) {
+    return formatPriceScale(max);
+  }
+
+  const ratio = rowIndex / (height - 1);
+  return formatPriceScale(max - (max - min) * ratio);
+}
+
 function buildChartRows(
   points: IntradayPoint[],
   width: number,
   height: number,
   prevClose?: number
-): {rows: string[]; baselineRows: Set<number>} {
+): {rows: string[]; baselineRows: Set<number>; min: number; max: number} {
   const dotWidth = Math.max(width, 1) * 2;
   const dotHeight = Math.max(height, 1) * 4;
   const prices = points.map((point) => point.price);
@@ -229,10 +243,19 @@ function buildChartRows(
     drawLine(curve, column - 1, dotRows[column - 1]!, column, dotRows[column]!, 1);
   }
 
-  return rasterizeBraille(curve, baseline, width, height);
+  return {...rasterizeBraille(curve, baseline, width, height), min, max};
 }
 
-export function IntradayChart({points, width = 50, height = 8, symbol, name, prevClose, volume}: IntradayChartProps) {
+export function IntradayChart({points, width = 50, height = 8, symbol, name, prevClose, volume, error}: IntradayChartProps) {
+  if (error) {
+    return (
+      <Box flexDirection="column">
+        <Text color="yellow">task.{symbol} intraday sync failed</Text>
+        <Text color="gray">{error}</Text>
+      </Box>
+    );
+  }
+
   if (points.length === 0) {
     return (
       <Box flexDirection="column">
@@ -270,6 +293,7 @@ export function IntradayChart({points, width = 50, height = 8, symbol, name, pre
       <Box marginTop={1} flexDirection="column">
         {chart.rows.map((row, rowIndex) => (
           <Text key={rowIndex}>
+            <Text color="gray">{scaleLabel(rowIndex, chart.rows.length, chart.min, chart.max)} │ </Text>
             {row.split('').map((char, columnIndex) => (
               <Text
                 key={columnIndex}

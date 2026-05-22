@@ -33,28 +33,28 @@ function formatVolume(vol: number): string {
   return vol.toFixed(0);
 }
 
-function rateLabel(event: QuoteEvent): string {
-  const pct = Math.abs(event.changePercent);
+function rateLabel(changePercent: number): string {
+  const pct = Math.abs(changePercent);
   if (pct > 3) return 'accelerating';
-  if (pct > 1) return event.changePercent > 0 ? 'rising' : 'declining';
+  if (pct > 1) return changePercent > 0 ? 'rising' : 'declining';
   if (pct > 0.3) return 'stable';
   return 'stagnant';
 }
 
-function flowLabel(event: QuoteEvent): string {
-  if (event.volume > 100000) return 'heavy';
-  if (event.volume > 50000) return 'high';
-  if (event.volume > 20000) return 'normal';
-  if (event.volume > 5000) return 'low';
+function flowLabel(volume: number): string {
+  if (volume > 100000) return 'heavy';
+  if (volume > 50000) return 'high';
+  if (volume > 20000) return 'normal';
+  if (volume > 5000) return 'low';
   return 'idle';
 }
 
-function trendArrow(event: QuoteEvent): string {
-  if (event.state === 'surging') return ' ↗↗';
-  if (event.state === 'rising') return ' ↗';
-  if (event.state === 'dropping') return ' ↘↘';
-  if (event.state === 'falling') return ' ↘';
-  if (event.state === 'volatile') return ' ↕';
+function trendArrow(state?: string): string {
+  if (state === 'surging') return ' ↗↗';
+  if (state === 'rising') return ' ↗';
+  if (state === 'dropping') return ' ↘↘';
+  if (state === 'falling') return ' ↘';
+  if (state === 'volatile') return ' ↕';
   return '';
 }
 
@@ -123,8 +123,41 @@ function buildDisguiseFill(anchor: Date, count: number): Array<{timestamp: strin
   }));
 }
 
+function disguiseMarketEvent(event: QuoteEvent): {timestamp: string; level: EventLevel; source: string; message: string} {
+  const seconds = Math.abs(Math.round(event.changePercent * 10)) % 9;
+
+  return {
+    timestamp: formatTimestamp(event.timestamp),
+    level: event.level,
+    source: FILLER_SOURCES[Math.abs(event.symbol.length + seconds) % FILLER_SOURCES.length]!,
+    message: FILLER_MESSAGES[Math.abs(event.message.length + seconds) % FILLER_MESSAGES.length]!
+  };
+}
+
+function latestEventsBySymbol(events: QuoteEvent[]): QuoteEvent[] {
+  const latestBySymbol = new Map<string, QuoteEvent>();
+
+  for (const event of events) {
+    latestBySymbol.set(event.symbol, event);
+  }
+
+  return Array.from(latestBySymbol.values()).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+}
+
+function DisguiseLogLine({entry}: {entry: {timestamp: string; level: EventLevel; source: string; message: string}}) {
+  return (
+    <Box>
+      <Text color="gray">[{entry.timestamp}] </Text>
+      <Text color={LEVEL_COLORS[entry.level]}>{entry.level.padEnd(5)} </Text>
+      <Text color="white">{entry.source}</Text>
+      <Text color="gray"> - </Text>
+      <Text color="white">{entry.message}</Text>
+    </Box>
+  );
+}
+
 export function LogStream({events, quotes, maxLines = 20, safeMode = false, viewportRows}: LogStreamProps) {
-  const displayEvents = events.slice(-maxLines);
+  const displayEvents = latestEventsBySymbol(events).slice(-maxLines);
   const anchor = displayEvents.at(-1)?.timestamp ?? new Date();
   const eventRows = displayEvents.reduce((count, event) => {
     const quote = quotes.get(event.symbol);
@@ -145,18 +178,24 @@ export function LogStream({events, quotes, maxLines = 20, safeMode = false, view
   return (
     <Box flexDirection="column">
       {prelude.map((entry, index) => (
-        <Box key={`prelude-${index}`}>
-          <Text color="gray">[{entry.timestamp}] </Text>
-          <Text color={LEVEL_COLORS[entry.level]}>{entry.level.padEnd(5)} </Text>
-          <Text color="white">{entry.source}</Text>
-          <Text color="gray"> - </Text>
-          <Text color="white">{entry.message}</Text>
-        </Box>
+        <DisguiseLogLine key={`prelude-${index}`} entry={entry} />
       ))}
 
       {displayEvents.map((event, index) => {
-        const sign = event.changePercent >= 0 ? '+' : '';
         const quote = quotes.get(event.symbol);
+        const changePercent = quote?.changePercent ?? event.changePercent;
+        const volume = quote?.volume ?? event.volume;
+        const state = quote?.state ?? event.state;
+        const sign = changePercent >= 0 ? '+' : '';
+
+        if (safeMode) {
+          return (
+            <DisguiseLogLine
+              key={`${event.symbol}-${event.timestamp.getTime()}-${index}`}
+              entry={disguiseMarketEvent(event)}
+            />
+          );
+        }
 
         return (
           <Box key={`${event.symbol}-${event.timestamp.getTime()}-${index}`} flexDirection="column">
@@ -169,12 +208,12 @@ export function LogStream({events, quotes, maxLines = 20, safeMode = false, view
               <Text color="gray">: </Text>
               {!safeMode && (
                 <>
-                  <Text color="cyan">delta={sign}{event.changePercent.toFixed(2)}%</Text>
+                  <Text color="cyan">delta={sign}{changePercent.toFixed(2)}%</Text>
                   <Text color="gray">, </Text>
-                  <Text color="white">rate={rateLabel(event)}</Text>
+                  <Text color="white">rate={rateLabel(changePercent)}</Text>
                   <Text color="gray">, </Text>
-                  <Text color="white">flow={flowLabel(event)}</Text>
-                  <Text color="cyan">{trendArrow(event)}</Text>
+                  <Text color="white">flow={flowLabel(volume)}</Text>
+                  <Text color="cyan">{trendArrow(state)}</Text>
                 </>
               )}
             </Box>
@@ -192,13 +231,7 @@ export function LogStream({events, quotes, maxLines = 20, safeMode = false, view
       })}
 
       {epilogue.map((entry, index) => (
-        <Box key={`epilogue-${index}`}>
-          <Text color="gray">[{entry.timestamp}] </Text>
-          <Text color={LEVEL_COLORS[entry.level]}>{entry.level.padEnd(5)} </Text>
-          <Text color="white">{entry.source}</Text>
-          <Text color="gray"> - </Text>
-          <Text color="white">{entry.message}</Text>
-        </Box>
+        <DisguiseLogLine key={`epilogue-${index}`} entry={entry} />
       ))}
     </Box>
   );

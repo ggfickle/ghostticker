@@ -17,6 +17,19 @@ describe('release packaging', () => {
     expect(installer).toContain('ghostticker-${tag}.tar.gz');
   });
 
+  it('ships a native Windows PowerShell installer', async () => {
+    const installer = await readFile('scripts/install.ps1', 'utf8');
+    const readme = await readFile('README.md', 'utf8');
+
+    expect(installer).toContain('$env:GHOSTTICKER_REPO');
+    expect(installer).toContain('$env:GHOSTTICKER_ASSET_URL');
+    expect(installer).toContain('ghostticker-$tag.tar.gz');
+    expect(installer).toContain('gtr.cmd');
+    expect(installer).toContain('SetEnvironmentVariable');
+    expect(readme).toContain('Windows PowerShell 安装');
+    expect(readme).toContain('irm https://raw.githubusercontent.com/ggfickle/ghostticker/main/scripts/install.ps1 | iex');
+  });
+
   it('has a node executable CLI entrypoint', async () => {
     const cli = await readFile('src/cli.tsx', 'utf8');
 

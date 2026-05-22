@@ -51,7 +51,7 @@ gtr
 - Node.js `22+`
 - npm
 
-### 一键安装
+### macOS / Linux 一键安装
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ggfickle/ghostticker/main/scripts/install.sh | bash
@@ -69,6 +69,22 @@ gtr
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
+### Windows PowerShell 安装
+
+在 PowerShell 中运行：
+
+```powershell
+irm https://raw.githubusercontent.com/ggfickle/ghostticker/main/scripts/install.ps1 | iex
+```
+
+安装脚本会把程序安装到 `%LOCALAPPDATA%\ghostticker`，并在 `%USERPROFILE%\.ghostticker\bin` 生成 `gtr.cmd`。
+
+安装脚本会自动把下面这个目录加入当前用户的 `Path`，安装完成后通常可以直接运行 `gtr`。如果当前 PowerShell 仍提示找不到命令，请重新打开 PowerShell：
+
+```powershell
+%USERPROFILE%\.ghostticker\bin
+```
+
 ### 从源码运行
 
 ```bash
@@ -82,7 +98,7 @@ gtr
 
 ## 界面展示
 
-以下三种界面说明基于当前版本，内容参考你提供的三张截图。
+以下四种界面说明基于当前版本，内容参考你提供的截图。
 
 ### 1. 自选管理视图
 
@@ -100,7 +116,15 @@ gtr
 
 ![默认日志视图](doc/images/log-stream.png)
 
-### 3. 分时展开视图
+### 3. Safe 模式视图
+
+- 进入方式：按 `s`
+- 用途：在需要更低调时，把中间的股票信息和分时图收起
+- 特点：界面保持为纯日志形态，股票事件会被替换成和上下文一致的系统日志内容
+
+![Safe 模式视图](doc/images/safe-mode.png)
+
+### 4. 分时展开视图
 
 - 展开方式：按 `v`
 - 展示内容：当前焦点标的的详细分时图、昨收基线、时间范围、成交量摘要
@@ -141,7 +165,8 @@ gtr
 
 - 更克制的显示形态
 - 用于有人靠近时快速降噪
-- 保留核心事件文本，减少明显行情特征
+- 按 `s` 切换后会收起分时图，并把可见股票事件伪装成普通系统日志
+- 不显示股票名称、价格、涨跌幅等明显行情特征
 
 ## 本地数据
 

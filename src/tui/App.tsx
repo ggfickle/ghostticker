@@ -64,6 +64,7 @@ export function App() {
     events,
     quotes,
     intradayData,
+    intradayErrors,
     safeMode,
     detailOpen,
     lastUpdate,
@@ -81,7 +82,6 @@ export function App() {
           inputBuffer={inputBuffer}
           selectedIndex={selectedIndex}
         />
-        <StatusBar focusedSymbol={focusedSymbol} detailOpen={detailOpen} safeMode={safeMode} />
       </Box>
     );
   }
@@ -114,6 +114,7 @@ export function App() {
             name={quotes.get(focusedSymbol)?.name}
             prevClose={quotes.get(focusedSymbol)?.prevClose}
             volume={quotes.get(focusedSymbol)?.volume}
+            error={intradayErrors.get(focusedSymbol)}
           />
         </Box>
       )}

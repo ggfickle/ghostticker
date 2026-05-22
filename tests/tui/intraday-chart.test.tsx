@@ -52,4 +52,38 @@ describe('IntradayChart', () => {
     expect(frame).not.toMatch(/[▁▂▃▄▅▆▇█]/);
     expect(frame).not.toMatch(/[╭╮╰╯]/);
   });
+
+  it('renders a left-side price scale for the chart rows', () => {
+    const app = render(
+      <IntradayChart
+        points={samplePoints()}
+        symbol="600519"
+        prevClose={10}
+        width={12}
+        height={5}
+      />
+    );
+
+    const frame = app.lastFrame();
+
+    expect(frame).toContain('10.30 │');
+    expect(frame).toContain('10.10 │');
+    expect(frame).toContain('9.90 │');
+  });
+
+  it('shows an actionable error when intraday data fails to load', () => {
+    const app = render(
+      <IntradayChart
+        points={[]}
+        symbol="123456"
+        error="Intraday request failed. Please confirm the stock code exists."
+      />
+    );
+
+    const frame = app.lastFrame();
+
+    expect(frame).toContain('task.123456 intraday sync failed');
+    expect(frame).toContain('Please confirm the stock code exists');
+    expect(frame).not.toContain('pending intraday sync');
+  });
 });
