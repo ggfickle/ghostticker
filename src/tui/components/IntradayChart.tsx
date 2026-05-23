@@ -297,7 +297,7 @@ export function IntradayChart({points, width = 50, height = 8, symbol, name, pre
             {row.split('').map((char, columnIndex) => (
               <Text
                 key={columnIndex}
-                color={char === String.fromCharCode(BRAILLE_EMPTY) ? undefined : 'white'}
+                color={char === String.fromCharCode(BRAILLE_EMPTY) ? undefined : 'gray'}
                 dimColor={chart.baselineRows.has(rowIndex)}
               >
                 {char}
