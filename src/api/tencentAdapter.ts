@@ -1,9 +1,12 @@
-import type {StockQuote, IntradayPoint} from '../domain/quote.js';
+import type {StockQuote, IntradayPoint, KLinePoint} from '../domain/quote.js';
 
 function formatSymbol(symbol: string): string {
   const code = symbol.replace(/\D/g, '');
   if (code.startsWith('6') || code.startsWith('5')) {
     return `sh${code}`;
+  }
+  if (code.startsWith('8') || code.startsWith('4') || code.startsWith('9')) {
+    return `bj${code}`;
   }
   return `sz${code}`;
 }
@@ -54,9 +57,7 @@ export async function fetchQuotes(symbols: string[]): Promise<Map<string, StockQ
 }
 
 export async function fetchIntraday(symbol: string): Promise<IntradayPoint[]> {
-  const code = symbol.replace(/\D/g, '');
-  const prefix = code.startsWith('6') || code.startsWith('5') ? 'sh' : 'sz';
-  const formatted = `${prefix}${code}`;
+  const formatted = formatSymbol(symbol);
   const url = `https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=${formatted}`;
 
   try {
@@ -74,6 +75,40 @@ export async function fetchIntraday(symbol: string): Promise<IntradayPoint[]> {
         volume: parseInt(parts[2]) || 0
       };
     });
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchKLine(symbol: string, period: 'day' | 'week' = 'day', count = 60): Promise<KLinePoint[]> {
+  const formatted = formatSymbol(symbol);
+  const url = `https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=${formatted},${period},,,${count},qfq`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    const qfqKey = `qfq${period}`;
+
+    const stockData = data?.data?.[formatted];
+    if (!stockData) return [];
+
+    const klineData = stockData[period] || stockData[qfqKey] || [];
+    const result: KLinePoint[] = [];
+
+    for (const item of klineData) {
+      if (item.length >= 5) {
+        result.push({
+          date: item[0],
+          open: parseFloat(item[1]),
+          close: parseFloat(item[2]),
+          high: parseFloat(item[3]),
+          low: parseFloat(item[4]),
+          volume: item[5] ? parseFloat(item[5]) : 0
+        });
+      }
+    }
+
+    return result;
   } catch {
     return [];
   }

@@ -41,7 +41,8 @@ Options:
     process.exit(0);
   });
 
-  const {waitUntilExit} = render(<App />);
+  const initialWatchlist = args.filter(arg => !arg.startsWith('-'));
+  const {waitUntilExit} = render(<App initialWatchlist={initialWatchlist} />);
 
   await waitUntilExit();
   cleanup();

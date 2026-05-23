@@ -97,12 +97,14 @@ describe('manage watchlist flow', () => {
     expect(app.lastFrame()).toContain('Input: 600519');
 
     app.stdin.write('\r');
-    await nextTick();
+    await waitForFrame(() => {
+      expect(app.lastFrame()).toContain('Input: _');
+      expect(app.lastFrame()).toContain('600519');
+    });
 
     const watchlistPath = path.join(tempHome, '.ghostticker', 'watchlist.json');
     const raw = await readFile(watchlistPath, 'utf8');
 
-    expect(app.lastFrame()).toContain('600519');
     expect(JSON.parse(raw)).toEqual(['600519']);
   });
 
