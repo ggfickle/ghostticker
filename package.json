@@ -1,6 +1,6 @@
 {
   "name": "ghostticker",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A disguised terminal watchlist TUI for quietly tracking A-share symbols.",
   "license": "MIT",
   "bin": {
